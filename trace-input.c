@@ -1883,7 +1883,7 @@ static int init_cpu(struct tracecmd_input *handle, int cpu)
 	list_head_init(&cpu_data->pages);
 
 	if (!cpu_data->size) {
-		printf("CPU %d is empty\n", cpu);
+		pr_stat("CPU %d is empty\n", cpu);
 		return 0;
 	}
 
