@@ -4269,6 +4269,9 @@ void trace_record (int argc, char **argv)
 	if (output)
 		output_file = output;
 
+	if (!extract)
+		make_instances();
+
 	/* Save the state of tracing_on before starting */
 	for_all_instances(instance) {
 
@@ -4284,9 +4287,6 @@ void trace_record (int argc, char **argv)
 	/* Extracting data records all events in the system. */
 	if (extract && !record_all)
 		record_all_events();
-
-	if (!extract)
-		make_instances();
 
 	if (events)
 		expand_event_list();
