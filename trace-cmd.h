@@ -123,6 +123,8 @@ int tracecmd_buffer_instances(struct tracecmd_input *handle);
 const char *tracecmd_buffer_instance_name(struct tracecmd_input *handle, int indx);
 struct tracecmd_input *tracecmd_buffer_instance_handle(struct tracecmd_input *handle, int indx);
 int tracecmd_is_buffer_instance(struct tracecmd_input *handle);
+void tracecmd_create_top_instance(char *name);
+void tracecmd_remove_instances(void);
 
 void tracecmd_print_events(struct tracecmd_input *handle, const char *regex);
 
