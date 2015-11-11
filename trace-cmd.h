@@ -90,6 +90,13 @@ enum {
 	TRACECMD_OPTION_HOOK,
 };
 
+enum tracecmd_trace_type {
+	TRACE_TYPE_RECORD	= 1,
+	TRACE_TYPE_START	= (1 << 1),
+	TRACE_TYPE_STREAM	= (1 << 2),
+	TRACE_TYPE_EXTRACT	= (1 << 3),
+};
+
 enum {
 	TRACECMD_FL_IGNORE_DATE		= (1 << 0),
 	TRACECMD_FL_BUFFER_INSTANCE	= (1 << 1),
@@ -283,6 +290,9 @@ void tracecmd_enable_events(void);
 void tracecmd_disable_all_tracing(int disable_tracer);
 void tracecmd_disable_tracing(void);
 void tracecmd_enable_tracing(void);
+void tracecmd_start_threads(enum tracecmd_trace_type type,
+			    tracecmd_handle_init_func handle_init, int global);
+void tracecmd_stop_threads(enum tracecmd_trace_type type);
 
 /* --- Plugin handling --- */
 extern struct pevent_plugin_option trace_ftrace_options[];

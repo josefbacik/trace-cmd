@@ -62,15 +62,6 @@
 
 #define UDP_MAX_PACKET (65536 - 20)
 
-enum trace_type {
-	TRACE_TYPE_RECORD	= 1,
-	TRACE_TYPE_START	= (1 << 1),
-	TRACE_TYPE_STREAM	= (1 << 2),
-	TRACE_TYPE_EXTRACT	= (1 << 3),
-};
-
-static tracecmd_handle_init_func handle_init = NULL;
-
 static int rt_prio;
 
 static int use_tcp;
@@ -83,7 +74,7 @@ static const char *output_file = "trace.dat";
 
 static int latency;
 static int sleep_time = 1000;
-static int cpu_count;
+static int cpu_count = 0;
 static int recorder_threads;
 static struct pid_record_data *pids;
 static int buffers;
@@ -562,7 +553,7 @@ static void delete_thread_data(void)
 	}
 }
 
-static void stop_threads(enum trace_type type)
+void tracecmd_stop_threads(enum tracecmd_trace_type type)
 {
 	struct timeval tv = { 0, 0 };
 	int ret;
@@ -594,7 +585,7 @@ static void stop_threads(enum trace_type type)
 }
 
 static int create_recorder(struct buffer_instance *instance, int cpu,
-			   enum trace_type type, int *brass);
+			   enum tracecmd_trace_type type, int *brass);
 
 static void flush_threads(void)
 {
@@ -912,7 +903,7 @@ static void update_task_filter(void)
 		update_pid_event_filters(instance);
 }
 
-static pid_t trace_waitpid(enum trace_type type, pid_t pid, int *status, int options)
+static pid_t trace_waitpid(enum tracecmd_trace_type type, pid_t pid, int *status, int options)
 {
 	struct timeval tv = { 1, 0 };
 	int ret;
@@ -1019,7 +1010,7 @@ static void enable_ptrace(void)
 	ptrace(PTRACE_TRACEME, 0, NULL, 0);
 }
 
-static void ptrace_wait(enum trace_type type, int main_pid)
+static void ptrace_wait(enum tracecmd_trace_type type, int main_pid)
 {
 	unsigned long send_sig;
 	unsigned long child;
@@ -1081,7 +1072,7 @@ static inline void ptrace_attach(int pid) { }
 
 #endif /* NO_PTRACE */
 
-static void trace_or_sleep(enum trace_type type)
+static void trace_or_sleep(enum tracecmd_trace_type type)
 {
 	struct timeval tv = { 1 , 0 };
 
@@ -1093,7 +1084,7 @@ static void trace_or_sleep(enum trace_type type)
 		sleep(10);
 }
 
-static void run_cmd(enum trace_type type, int argc, char **argv)
+static void run_cmd(enum tracecmd_trace_type type, int argc, char **argv)
 {
 	int status;
 	int pid;
@@ -2389,7 +2380,7 @@ create_recorder_instance(struct buffer_instance *instance, const char *file, int
  * connections and exit as the tracing is serialized by a single thread.
  */
 static int create_recorder(struct buffer_instance *instance, int cpu,
-			   enum trace_type type, int *brass)
+			   enum tracecmd_trace_type type, int *brass)
 {
 	long ret;
 	char *file;
@@ -2572,7 +2563,8 @@ static void finish_network(void)
 	free(host);
 }
 
-static void start_threads(enum trace_type type, int global)
+void tracecmd_start_threads(enum tracecmd_trace_type type,
+			    tracecmd_handle_init_func handle_init, int global)
 {
 	struct buffer_instance *instance;
 	int *brass = NULL;
@@ -2581,6 +2573,8 @@ static void start_threads(enum trace_type type, int global)
 
 	if (host)
 		setup_network();
+	if (!cpu_count)
+		cpu_count = count_cpus();
 
 	/* make a thread for every CPU we have */
 	pids = malloc_or_die(sizeof(*pids) * cpu_count * (buffers + 1));
@@ -3449,7 +3443,7 @@ static void check_doing_something(void)
 
 static void
 update_plugin_instance(struct buffer_instance *instance,
-		       enum trace_type type)
+		       enum tracecmd_trace_type type)
 {
 	const char *plugin = instance->plugin;
 
@@ -3485,7 +3479,7 @@ update_plugin_instance(struct buffer_instance *instance,
 		set_plugin_instance(instance, plugin);
 }
 
-static void update_plugins(enum trace_type type)
+static void update_plugins(enum tracecmd_trace_type type)
 {
 	struct buffer_instance *instance;
 
@@ -3830,7 +3824,8 @@ void trace_record (int argc, char **argv)
 	struct event_list *event = NULL;
 	struct event_list *last_event;
 	struct buffer_instance *instance = &top_instance;
-	enum trace_type type = 0;
+	tracecmd_handle_init_func handle_init = NULL;
+	enum tracecmd_trace_type type = 0;
 	char *pids;
 	char *pid;
 	char *sav;
@@ -4362,7 +4357,7 @@ void trace_record (int argc, char **argv)
 	if (type & (TRACE_TYPE_RECORD | TRACE_TYPE_STREAM)) {
 		signal(SIGINT, finish);
 		if (!latency)
-			start_threads(type, global);
+			tracecmd_start_threads(type, handle_init, global);
 	}
 
 	if (extract) {
@@ -4391,7 +4386,7 @@ void trace_record (int argc, char **argv)
 
 		tracecmd_disable_tracing();
 		if (!latency)
-			stop_threads(type);
+			tracecmd_stop_threads(type);
 	}
 
 	record_stats();
