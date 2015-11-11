@@ -34,7 +34,7 @@
 #include <signal.h>
 
 #include "trace-local.h"
-#include "trace-hash-local.h"
+#include "trace-hash.h"
 #include "list.h"
 
 static int kmalloc_type;

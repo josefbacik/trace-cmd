@@ -28,6 +28,7 @@
 #endif
 #include "trace-local.h"
 #include "trace-hash.h"
+#include "list.h"
 
 #ifdef WARN_NO_AUDIT
 # warning "lib audit not found, using raw syscalls "	\
