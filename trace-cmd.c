@@ -482,9 +482,23 @@ int main (int argc, char **argv)
 		   strcmp(argv[1], "extract") == 0 ||
 		   strcmp(argv[1], "stop") == 0 ||
 		   strcmp(argv[1], "stream") == 0 ||
-		   strcmp(argv[1], "profile") == 0 ||
 		   strcmp(argv[1], "restart") == 0 ||
 		   strcmp(argv[1], "reset") == 0) {
+
+		/* Need to keep this stuff out of trace-record proper. */
+		if (strcmp(argv[1], "stream") == 0)
+			trace_record_set_handle_init(trace_init_stream);
+
+		/*
+		 * A little ugly but we want to catch trace-cmd record --profile
+		 * so we can let trace_profile be run properly.
+		 */
+		for (c = 2; c < argc; c++) {
+			if (strcmp(argv[c], "--profile") == 0) {
+				trace_profile(argc, argv);
+				exit(0);
+			}
+		}
 		trace_record(argc, argv);
 		exit(0);
 
@@ -743,6 +757,8 @@ int main (int argc, char **argv)
 	} else if (strcmp(argv[1], "-h") == 0 ||
 		   strcmp(argv[1], "help") == 0) {
 		usage(argv);
+	} else if (strcmp(argv[1], "profile") == 0) {
+		trace_profile(argc, argv);
 	} else {
 		fprintf(stderr, "unknown command: %s\n", argv[1]);
 		usage(argv);

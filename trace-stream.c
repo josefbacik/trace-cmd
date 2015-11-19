@@ -127,7 +127,13 @@ int trace_stream_read(struct pid_record_data *pids, int nr_pids, struct timeval 
 			last_pid = pid;
 	}
 	if (last_pid) {
-		trace_show_data(last_pid->instance->handle, last_pid->record);
+		tracecmd_show_data_func func;
+
+		func = tracecmd_get_show_data_func(last_pid->instance->handle);
+		if (func)
+			func(last_pid->instance->handle, last_pid->record);
+		else
+			printf("You haven't set a show data func!?!?!\n");
 		free_record(last_pid->record);
 		last_pid->record = NULL;
 		return 1;

@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
+#include <unistd.h>
 #ifndef NO_AUDIT
 #include <libaudit.h>
 #endif
@@ -2333,7 +2335,7 @@ static void merge_tasks(struct handle_data *h)
 	}
 }
 
-int trace_profile(void)
+int trace_profile_output(void)
 {
 	struct handle_data *h;
 
@@ -2344,5 +2346,37 @@ int trace_profile(void)
 		trace_hash_free(&h->task_hash);
 	}
 
+	return 0;
+}
+
+enum {
+	OPT_bycomm	= 250,
+};
+
+int trace_profile(int argc, char **argv)
+{
+	int option_index = 0;
+	int c;
+	struct option long_options[] = {
+		{"by-comm", no_argument, NULL, OPT_bycomm},
+		{NULL, 0, NULL, 0},
+	};
+
+	while ((c = getopt_long(argc-1, argv+1, "", long_options,
+				&option_index)) != -1) {
+		switch (c) {
+		case OPT_bycomm:
+			merge_like_comms = true;
+			break;
+		default:
+			/* We don't care, trace-record will take care of this */
+			break;
+		}
+	}
+
+	trace_record_set_handle_init(trace_init_profile);
+	optind = 1;
+	trace_record(argc, argv);
+	trace_profile_output();
 	return 0;
 }

@@ -3807,6 +3807,12 @@ void update_first_instance(struct buffer_instance *instance, int topt)
 		first_instance = buffer_instances;
 }
 
+static tracecmd_handle_init_func __handle_init = NULL;
+void trace_record_set_handle_init(tracecmd_handle_init_func func)
+{
+	__handle_init = func;
+}
+
 enum {
 	OPT_bycomm	= 250,
 	OPT_stderr	= 251,
@@ -3824,7 +3830,6 @@ void trace_record (int argc, char **argv)
 	struct event_list *event = NULL;
 	struct event_list *last_event;
 	struct buffer_instance *instance = &top_instance;
-	tracecmd_handle_init_func handle_init = NULL;
 	enum tracecmd_trace_type type = 0;
 	char *pids;
 	char *pid;
@@ -3861,7 +3866,6 @@ void trace_record (int argc, char **argv)
 	else if ((stream = strcmp(argv[1], "stream") == 0))
 		; /* do nothing */
 	else if ((profile = strcmp(argv[1], "profile") == 0)) {
-		handle_init = trace_init_profile;
 		events = 1;
 	} else if (strcmp(argv[1], "stop") == 0) {
 		for (;;) {
@@ -4230,7 +4234,6 @@ void trace_record (int argc, char **argv)
 			recorder_flags |= TRACECMD_RECORD_NOSPLICE;
 			break;
 		case OPT_profile:
-			handle_init = trace_init_profile;
 			instance->profile = 1;
 			events = 1;
 			break;
@@ -4243,7 +4246,7 @@ void trace_record (int argc, char **argv)
 			dup2(2, 1);
 			break;
 		case OPT_bycomm:
-			trace_profile_set_merge_like_comms();
+			/* Handled by trace-profile. */
 			break;
 		default:
 			usage(argv);
@@ -4357,7 +4360,7 @@ void trace_record (int argc, char **argv)
 	if (type & (TRACE_TYPE_RECORD | TRACE_TYPE_STREAM)) {
 		signal(SIGINT, finish);
 		if (!latency)
-			tracecmd_start_threads(type, handle_init, global);
+			tracecmd_start_threads(type, __handle_init, global);
 	}
 
 	if (extract) {
@@ -4367,7 +4370,7 @@ void trace_record (int argc, char **argv)
 		if (!(type & (TRACE_TYPE_RECORD | TRACE_TYPE_STREAM))) {
 			update_task_filter();
 			tracecmd_enable_tracing();
-			exit(0);
+			return;
 		}
 
 		if (run_command)
@@ -4413,7 +4416,7 @@ void trace_record (int argc, char **argv)
 	destroy_stats();
 
 	if (keep)
-		exit(0);
+		return;
 
 	update_reset_files();
 	update_reset_triggers();
@@ -4433,8 +4436,5 @@ void trace_record (int argc, char **argv)
 	if (host)
 		tracecmd_output_close(network_handle);
 
-	if (profile)
-		trace_profile();
-
-	exit(0);
+	return;
 }

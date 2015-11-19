@@ -739,9 +739,9 @@ static void finish_wakeup(void)
 	trace_hash_free(&wakeup_hash);
 }
 
-void trace_show_data(struct tracecmd_input *handle, struct pevent_record *record)
+static void trace_show_data(struct tracecmd_input *handle,
+			    struct pevent_record *record)
 {
-	tracecmd_show_data_func func = tracecmd_get_show_data_func(handle);
 	struct pevent *pevent;
 	struct trace_seq s;
 	int cpu = record->cpu;
@@ -749,10 +749,6 @@ void trace_show_data(struct tracecmd_input *handle, struct pevent_record *record
 
 	test_save(record, cpu);
 
-	if (func) {
-		func(handle, record);
-		return;
-	}
 	pevent = tracecmd_get_pevent(handle);
 
 	trace_seq_init(&s);
@@ -819,6 +815,12 @@ void trace_show_data(struct tracecmd_input *handle, struct pevent_record *record
 	process_wakeup(pevent, record);
 
 	printf("\n");
+}
+
+void trace_init_stream(struct tracecmd_input *handle, struct hook_list *hook,
+		       int global)
+{
+	tracecmd_set_show_data_func(handle, trace_show_data);
 }
 
 static void read_rest(void)
@@ -1164,7 +1166,7 @@ static void read_data_info(struct list_head *handle_list, enum output_type otype
 	} while (last_record);
 
 	if (profile)
-		trace_profile();
+		trace_profile_output();
 
 	list_for_each_entry(handles, handle_list, list) {
 		free_filters(handles->event_filters);
