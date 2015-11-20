@@ -2214,7 +2214,7 @@ static void expand_event_instance(struct buffer_instance *instance)
 	}
 }
 
-static void expand_event_list(void)
+void tracecmd_expand_event_list(void)
 {
 	struct buffer_instance *instance;
 
@@ -4318,7 +4318,7 @@ void trace_record (int argc, char **argv)
 		record_all_events();
 
 	if (events)
-		expand_event_list();
+		tracecmd_expand_event_list();
 
 	page_size = getpagesize();
 

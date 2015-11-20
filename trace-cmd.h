@@ -286,6 +286,7 @@ void tracecmd_stop_recording(struct tracecmd_recorder *recorder);
 void tracecmd_stat_cpu(struct trace_seq *s, int cpu);
 long tracecmd_flush_recording(struct tracecmd_recorder *recorder);
 int tracecmd_add_event(const char *event_str, int stack);
+void tracecmd_expand_event_list(void);
 void tracecmd_enable_events(void);
 void tracecmd_disable_all_tracing(int disable_tracer);
 void tracecmd_disable_tracing(void);
