@@ -2563,6 +2563,11 @@ static void finish_network(void)
 	free(host);
 }
 
+int tracecmd_stream_loop(struct timeval *tv)
+{
+	return trace_stream_read(pids, recorder_threads, tv);
+}
+
 void tracecmd_start_threads(enum tracecmd_trace_type type,
 			    tracecmd_handle_init_func handle_init, int global)
 {

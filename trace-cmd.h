@@ -293,6 +293,7 @@ void tracecmd_enable_tracing(void);
 void tracecmd_start_threads(enum tracecmd_trace_type type,
 			    tracecmd_handle_init_func handle_init, int global);
 void tracecmd_stop_threads(enum tracecmd_trace_type type);
+int tracecmd_stream_loop(struct timeval *tv);
 
 /* --- Plugin handling --- */
 extern struct pevent_plugin_option trace_ftrace_options[];
