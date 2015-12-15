@@ -583,6 +583,9 @@ install_gui: install_cmd gui
 	$(Q)$(call do_install,trace-graph,$(bindir_SQ))
 	$(Q)$(call do_install,kernelshark,$(bindir_SQ))
 
+install_static:
+	$(Q)$(call do_install,libtracecmd.a,$(libdir_SQ))
+
 install_libs: libs
 	$(Q)$(call do_install,libtracecmd.so,$(libdir_SQ))
 	$(Q)$(call do_install,libparsevent.so,$(libdir_SQ))
