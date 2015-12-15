@@ -27,6 +27,8 @@
 
 int trace_hash_init(struct trace_hash *hash, int buckets)
 {
+	struct list_head *bucket;
+
 	memset(hash, 0, sizeof(*hash));
 
 	hash->buckets = calloc(sizeof(*hash->buckets), buckets);
@@ -38,6 +40,8 @@ int trace_hash_init(struct trace_hash *hash, int buckets)
 	if (!(buckets & (buckets - 1)))
 		hash->power = buckets - 1;
 
+	trace_hash_for_each_bucket(bucket, hash)
+		list_head_init(bucket);
 	return 0;
 }
 
@@ -48,30 +52,22 @@ void trace_hash_free(struct trace_hash *hash)
 
 int trace_hash_empty(struct trace_hash *hash)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 
 	trace_hash_for_each_bucket(bucket, hash)
-		if (*bucket)
+		if (!list_empty(bucket))
 			return 0;
 	return 1;
 }
 
 int trace_hash_add(struct trace_hash *hash, struct trace_hash_item *item)
 {
-	struct trace_hash_item *next;
-	int bucket = hash->power ? item->key & hash->power :
+	struct list_head *bucket;
+	int bucket_nr = hash->power ? item->key & hash->power :
 		item->key % hash->nr_buckets;
 
-	if (hash->buckets[bucket]) {
-		next = hash->buckets[bucket];
-		next->prev = item;
-	} else
-		next = NULL;
-
-	item->next = next;
-	item->prev = (struct trace_hash_item *)&hash->buckets[bucket];
-
-	hash->buckets[bucket] = item;
+	bucket = hash->buckets + bucket_nr;
+	list_add(&item->list, bucket);
 
 	return 1;
 }
@@ -81,10 +77,13 @@ trace_hash_find(struct trace_hash *hash, unsigned long long key,
 		trace_hash_func match, void *data)
 {
 	struct trace_hash_item *item;
-	int bucket = hash->power ? key & hash->power :
+	struct list_head *bucket;
+	int bucket_nr = hash->power ? key & hash->power :
 		key % hash->nr_buckets;
 
-	for (item = hash->buckets[bucket]; item; item = item->next) {
+	bucket = hash->buckets + bucket_nr;
+
+	trace_hash_for_each_item(item, bucket) {
 		if (item->key == key) {
 			if (!match)
 				return item;

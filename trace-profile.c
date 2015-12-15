@@ -1799,7 +1799,7 @@ static int compare_stacks(const void *a, const void *b)
 
 static void output_stacks(struct pevent *pevent, struct trace_hash *stack_hash)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 	struct stack_data **stacks;
 	struct stack_chain *chain;
@@ -1919,7 +1919,7 @@ static int compare_events(const void *a, const void *b)
 
 static void output_task(struct handle_data *h, struct task_data *task)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 	struct event_hash **events;
 	const char *comm;
@@ -1964,7 +1964,7 @@ static void output_task(struct handle_data *h, struct task_data *task)
 
 static void output_group(struct handle_data *h, struct group_data *group)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 	struct event_hash **events;
 	int nr_events = 0;
@@ -2017,7 +2017,7 @@ static int compare_groups(const void *a, const void *b)
 
 static void free_event_hash(struct event_hash *event_hash)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 	struct stack_data *stack;
 
@@ -2034,7 +2034,7 @@ static void free_event_hash(struct event_hash *event_hash)
 
 static void __free_task(struct task_data *task)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 	struct start_data *start;
 	struct event_hash *event_hash;
@@ -2074,7 +2074,7 @@ static void free_task(struct task_data *task)
 
 static void free_group(struct group_data *group)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 	struct event_hash *event_hash;
 
@@ -2102,7 +2102,7 @@ static void show_global_task(struct handle_data *h,
 
 static void output_tasks(struct handle_data *h)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 	struct task_data **tasks;
 	int nr_tasks = 0;
@@ -2137,7 +2137,7 @@ static void output_tasks(struct handle_data *h)
 
 static void output_groups(struct handle_data *h)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 	struct group_data **groups;
 	int nr_groups = 0;
@@ -2219,7 +2219,7 @@ static void merge_stacks(struct event_hash *exist, struct event_hash *event)
 {
 	struct stack_data *stack;
 	struct trace_hash_item *item;
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 
 	trace_hash_for_each_bucket(bucket, &event->stacks) {
 		trace_hash_while_item(item, bucket) {
@@ -2286,7 +2286,7 @@ static void add_group(struct handle_data *h, struct task_data *task)
 	unsigned long long key;
 	struct trace_hash_item *item;
 	struct group_data *grp;
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	void *data = task->comm;
 
 	if (!task->comm)
@@ -2323,7 +2323,7 @@ static void add_group(struct handle_data *h, struct task_data *task)
 
 static void merge_tasks(struct handle_data *h)
 {
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 
 	if (!merge_like_comms)

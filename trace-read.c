@@ -710,7 +710,7 @@ show_wakeup_timings(unsigned long long total, unsigned long count,
 static void finish_wakeup(void)
 {
 	struct wakeup_info *info;
-	struct trace_hash_item **bucket;
+	struct list_head *bucket;
 	struct trace_hash_item *item;
 
 	if (!show_wakeup || !wakeup_lat_count)

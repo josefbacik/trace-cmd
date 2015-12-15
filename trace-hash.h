@@ -20,14 +20,15 @@
 #ifndef _TRACE_HASH_H
 #define _TRACE_HASH_H
 
+#include "list.h"
+
 struct trace_hash_item {
-	struct trace_hash_item	*next;
-	struct trace_hash_item	*prev;
+	struct list_head	list;
 	unsigned long long	key;
 };
 
 struct trace_hash {
-	struct trace_hash_item	**buckets;
+	struct list_head	*buckets;
 	int			nr_buckets;
 	int			power;
 };
@@ -39,11 +40,7 @@ int trace_hash_empty(struct trace_hash *hash);
 
 static inline void trace_hash_del(struct trace_hash_item *item)
 {
-	struct trace_hash_item *prev = item->prev;
-
-	prev->next = item->next;
-	if (item->next)
-		item->next->prev = prev;
+	list_del(&item->list);
 }
 
 #define trace_hash_for_each_bucket(bucket, hash)			\
@@ -51,14 +48,14 @@ static inline void trace_hash_del(struct trace_hash_item *item)
 	     (bucket) < (hash)->buckets + (hash)->nr_buckets; (bucket)++)
 
 #define trace_hash_for_each_item(item, bucket)				\
-	for ((item = *(bucket)); item; item = (item)->next)
+	list_for_each_entry(item, bucket, list)
 
 #define trace_hash_for_each_item_safe(item, n, bucket)		\
-	for ((item = *(bucket)), n = item ? item->next : NULL; item; \
-	     item = n, n = item ? (item)->next : NULL)
+	list_for_each_entry_safe(item, n, bucket, list)
 
-#define trace_hash_while_item(item, bucket)	\
-	while ((item = *(bucket)))
+#define trace_hash_while_item(item, bucket)					\
+	while ((!list_empty(bucket) &&						\
+		(item = container_of((bucket)->next, typeof(*item), list))))
 
 typedef int (*trace_hash_func)(struct trace_hash_item *item, void *data);
 

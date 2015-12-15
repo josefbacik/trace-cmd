@@ -592,6 +592,7 @@ install_libs: libs
 	$(Q)$(call do_install,event-parse.h,$(includedir_SQ))
 	$(Q)$(call do_install,trace-cmd.h,$(includedir_SQ))
 	$(Q)$(call do_install,trace-hash.h,$(includedir_SQ))
+	$(Q)$(call do_install,list.h,$(includedir_SQ))
 
 doc:
 	$(MAKE) -C $(src)/Documentation all
