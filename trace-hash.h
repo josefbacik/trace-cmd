@@ -62,6 +62,9 @@ typedef int (*trace_hash_func)(struct trace_hash_item *item, void *data);
 struct trace_hash_item *
 trace_hash_find(struct trace_hash *hash, unsigned long long key,
 		trace_hash_func match, void *data);
+struct trace_hash_item *
+trace_hash_find_reverse(struct trace_hash *hash, unsigned long long key,
+			trace_hash_func match, void *data);
 
 static inline unsigned int trace_hash(int val)
 {

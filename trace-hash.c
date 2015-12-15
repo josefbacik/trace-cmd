@@ -94,3 +94,25 @@ trace_hash_find(struct trace_hash *hash, unsigned long long key,
 
 	return NULL;
 }
+
+struct trace_hash_item *
+trace_hash_find_reverse(struct trace_hash *hash, unsigned long long key,
+			trace_hash_func match, void *data)
+{
+	struct trace_hash_item *item;
+	struct list_head *bucket;
+	int bucket_nr = hash->power ? key & hash->power :
+		key % hash->nr_buckets;
+
+	bucket = hash->buckets + bucket_nr;
+	list_for_each_entry_reverse(item, bucket, list) {
+		if (item->key == key) {
+			if (!match)
+				return item;
+			if (match(item, data))
+				return item;
+		}
+	}
+
+	return NULL;
+}
