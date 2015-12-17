@@ -282,6 +282,7 @@ struct tracecmd_recorder *tracecmd_create_buffer_recorder(const char *file, int 
 struct tracecmd_recorder *tracecmd_create_buffer_recorder_maxkb(const char *file, int cpu, unsigned flags, const char *buffer, int maxkb);
 
 int tracecmd_start_recording(struct tracecmd_recorder *recorder, unsigned long sleep);
+long tracecmd_stream_recording(struct tracecmd_recorder *recorder, unsigned long sleep);
 void tracecmd_stop_recording(struct tracecmd_recorder *recorder);
 void tracecmd_stat_cpu(struct trace_seq *s, int cpu);
 long tracecmd_flush_recording(struct tracecmd_recorder *recorder);

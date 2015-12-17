@@ -440,6 +440,36 @@ long tracecmd_flush_recording(struct tracecmd_recorder *recorder)
 	return total;
 }
 
+#define USECS_IN_SEC 1000000UL
+long tracecmd_stream_recording(struct tracecmd_recorder *recorder, unsigned long sleep)
+{
+	static int nonblock = 0;
+	fd_set rfds;
+	struct timeval tv;
+	long total = 0;
+	long ret;
+
+	if (!nonblock)
+		set_nonblock(recorder);
+
+	FD_ZERO(&rfds);
+	FD_SET(recorder->trace_fd, &rfds);
+	tv.tv_sec = sleep / USECS_IN_SEC;
+	tv.tv_usec = sleep % USECS_IN_SEC;
+	ret = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
+	if (ret <= 0)
+		return 0;
+
+	do {
+		ret = read_data(recorder);
+		if (ret < 0)
+			return ret;
+		total += ret;
+	} while (ret);
+
+	return total;
+}
+
 int tracecmd_start_recording(struct tracecmd_recorder *recorder, unsigned long sleep)
 {
 	struct timespec req;

@@ -2450,8 +2450,13 @@ static int create_recorder(struct buffer_instance *instance, int cpu,
 	}
 
 	while (!finished) {
-		if (tracecmd_start_recording(recorder, sleep_time) < 0)
-			break;
+		if (type == TRACE_TYPE_STREAM) {
+			if (tracecmd_stream_recording(recorder, sleep_time) < 0)
+				break;
+		} else {
+			if (tracecmd_start_recording(recorder, sleep_time) < 0)
+				break;
+		}
 	}
 	tracecmd_free_recorder(recorder);
 
