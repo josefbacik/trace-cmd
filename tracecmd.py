@@ -238,6 +238,8 @@ class Trace(object):
         # rec ownership goes over to Event instance
         return Event(self._pevent, rec, format)
 
+    def cpustats(self):
+        return tracecmd_cpustats(self._handle)
 
 # Basic builtin test, execute module directly
 if __name__ == "__main__":

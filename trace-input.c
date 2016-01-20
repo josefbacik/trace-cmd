@@ -3025,3 +3025,12 @@ void tracecmd_set_show_data_func(struct tracecmd_input *handle,
 {
 	handle->show_data_func = func;
 }
+
+/**
+ * tracecmd_cpustats - return the cpu stats for the handle.
+ * @handle: input handle for the trace.dat file
+ */
+char *tracecmd_cpustats(struct tracecmd_input *handle)
+{
+	return handle->cpustats;
+}

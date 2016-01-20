@@ -129,6 +129,7 @@ int tracecmd_copy_headers(struct tracecmd_input *handle, int fd);
 void tracecmd_set_flag(struct tracecmd_input *handle, int flag);
 void tracecmd_clear_flag(struct tracecmd_input *handle, int flag);
 unsigned long tracecmd_get_flags(struct tracecmd_input *handle);
+char *tracecmd_cpustats(struct tracecmd_input *handle);
 
 int tracecmd_make_pipe(struct tracecmd_input *handle, int cpu, int fd, int cpus);
 
